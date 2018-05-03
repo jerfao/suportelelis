@@ -1,0 +1,12 @@
+set_password(){
+    while [[ -z $password_result ]] || [[ $password_result == "1" ]] ; do
+        rootpasswd1=$(whiptail --passwordbox "Enter new password for root:" 10 60 3>&1 1>&2 2>&3)
+        rootpasswd2=$(whiptail --passwordbox "Repeat new password for root:" 10 60 3>&1 1>&2 2>&3)
+        if [ $rootpasswd1 != $rootpasswd2 ]; then
+            whiptail --msgbox "Passwords do not match" 10 60
+            ! true  
+        fi
+        password_result=$?
+    done
+    echo -e "$rootpasswd1\n$rootpasswd2" | passwd root
+}
