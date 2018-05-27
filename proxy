@@ -3,7 +3,7 @@ clear
 Menu(){
 clear
    echo "------------------------------------------"
-   echo "    LinuxAdmin          "
+   echo "    LinuxAdmin  - Zabbix 3.4        "
    echo "------------------------------------------"
    echo
    echo "[ 1 ] Zabbix Proxy"
