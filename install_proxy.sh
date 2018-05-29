@@ -155,6 +155,55 @@ echo "Instlando o Agent Zabbix"
 sleep 2
 Menu
 }
+InstalarZabbix(){
+
+apt update && apt upgrade
+# wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
+# dpkg -i zabbix-release_3.4-1+stretch_all.deb
+# apt update
+# apt install zabbix-server-mysql zabbix-frontend-php zabbix-agent
+
+#Vamos criar uma base de dados chamada zabbix e um usuário também chamado de zabbix no MariaDB.
+mariadb
+create database zabbix character set utf8 collate utf8_bin;
+grant all privileges on zabbix.* to zabbix@localhost identified by 'SENHA-USUARIO-ZABBIX';
+quit;
+
+zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
+
+Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
+
+# vim /etc/zabbix/zabbix_server.conf
+#...
+#DBHost=localhost
+#...
+#DBName=zabbix
+#...
+#DBUser=zabbix
+#...
+#DBPassword=SENHA-USUARIO-ZABBIX
+#...
+#mudando o timezone
+
+sed -i's/# php_value date.timezone Europe\/Riga /php_value date.timezone America\/Sao_Paulo' /etc/apache2/conf-enabled/zabbix.conf
+
+apt install php7.0-bcmath php7.0-mbstring php-sabre-xml
+
+/etc/init.d/apache2 restart
+
+#iniciando o Zabbix Server e o Agente.
+
+systemctl enable zabbix-server
+systemctl enable zabbix-agent
+/etc/init.d/zabbix-server restart
+/etc/init.d/zabbix-agent restart
+
+echo "Instalação Concluida!.."
+sleep(3)
+Menu
+
+}
+
 
 Downloads() {
 
