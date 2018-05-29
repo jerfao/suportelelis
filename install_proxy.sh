@@ -185,7 +185,9 @@ Agora vamos editar o arquivo zabbix_server.conf para informar os dados para cone
 #...
 #mudando o timezone
 
-sed -i's/# php_value date.timezone Europe\/Riga /php_value date.timezone America\/Sao_Paulo' /etc/apache2/conf-enabled/zabbix.conf
+sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/apache2/conf-enabled/zabbix.conf
+
+sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/zabbix/apache.conf
 
 apt install php7.0-bcmath php7.0-mbstring php-sabre-xml
 
