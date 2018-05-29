@@ -6,9 +6,9 @@ clear
    echo "    LinuxAdmin  - Zabbix 3.4        "
    echo "------------------------------------------"
    echo
-   echo "[ 1 ] Zabbix Proxy"
-   echo "[ 2 ] Zabbix Agent"
-   echo "[ 3 ] Zabbix Download"
+   echo "[ 1 ] Instalar Zabbix"
+   echo "[ 2 ] Zabbix Proxy"
+   echo "[ 3 ] Zabbix Agent"
    echo "[ 4 ] Desinstalar"
    echo "[ 5 ] Grafana"
    echo "[ 6 ] Sair"
@@ -16,9 +16,9 @@ clear
    echo -n "Qual a opcao desejada ? "
    read opcao
    case $opcao in
-      1) ZabbixProxy;;
-      2) ZabbixAgent;;
-      3) Downloads;;
+      1) InstalarZabbix;;
+      2) ZabbixProxy;;
+      3) ZabbixAgent;;
       4) Desinstalar;;
       5) InstalarGrafana;;
       6) exit ;;
@@ -158,10 +158,11 @@ Menu
 InstalarZabbix(){
 
 apt update && apt upgrade
-# wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
-# dpkg -i zabbix-release_3.4-1+stretch_all.deb
-# apt update
-# apt install zabbix-server-mysql zabbix-frontend-php zabbix-agent
+cd /tmp
+wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
+dpkg -i zabbix-release_3.4-1+stretch_all.deb
+apt update
+apt install zabbix-server-mysql zabbix-frontend-php zabbix-agent
 
 #Vamos criar uma base de dados chamada zabbix e um usuário também chamado de zabbix no MariaDB.
 mariadb
@@ -200,7 +201,7 @@ systemctl enable zabbix-agent
 /etc/init.d/zabbix-server restart
 /etc/init.d/zabbix-agent restart
 
-echo "Instalação Concluida!.."
+echo "Instalação Zabbix Concluida!.."
 sleep(3)
 Menu
 
