@@ -135,7 +135,7 @@ Menu
 }
 ZabbixAgent(){
 
-
+#outro teste não homologado
 echo "Instlando o Agent Zabbix"
 #Instalando o Zabbix Proxy x Zabbix Agent:
 # apt install zabbix-proxy-mysql zabbix-agent
@@ -151,31 +151,6 @@ echo "Instlando o Agent Zabbix"
 #   HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
 #   service zabbix-agent restart
 #---------------------------------------------------------------------------------------------------
-# *****Tratar com IF para pegar o status do servico Proxy*****
-# Verificando o funcionamento do Zabbix Proxy:
-# #  systemctl status zabbix-proxy.service
-# ou
-# # /etc/init.d/zabbix-proxy status
-# 
-# 	
-# 	# Adequando arquivos de log de zabbix-server e zabbix-agent
-# 	mkdir /var/log/zabbix
-# 	chown root:zabbix /var/log/zabbix
-# 	chmod 775 /var/log/zabbix
-# 
-# 	sed -i 's/LogFile=\/tmp\/zabbix_agentd.log*/LogFile=\/var\/log\/zabbix\/zabbix_agentd.log/' /etc/zabbix/zabbix_agentd.conf
-# 	sed -i 's/LogFile=\/tmp\/zabbix_server.log*/LogFile=\/var\/log\/zabbix\/zabbix_server.log/' /etc/zabbix/zabbix_server.conf
-# 	sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/zabbix/apache.conf
-# 	# Habilitando execução de comandos via Zabbix
-# 	sed -i 's/# EnableRemoteCommands=0*/EnableRemoteCommands=1/' /etc/zabbix/zabbix_agentd.conf
-# 	
-# 	# Criando atalhos para binários
-# 	ln -s /usr/local/zabbix/sbin/zabbix_agentd /sbin/zabbix_agentd
-# 	ln -s /usr/local/zabbix/sbin/zabbix_server /sbin/zabbix_server
-# 
-# 	ln -s /usr/local/zabbix/bin/zabbix_get /bin/zabbix_get
-# 	ln -s /usr/local/zabbix/bin/zabbix_sender /bin/zabbix_sender
-
 
 sleep 2
 Menu
