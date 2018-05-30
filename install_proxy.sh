@@ -334,26 +334,33 @@ cd /tmp/
 
 #Atualizado
 wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_5.1.3_amd64.deb
-sudo apt-get install -y adduser libfontconfig
-sudo dpkg -i grafana_5.1.3_amd64.deb
+apt-get install -y adduser libfontconfig apt-transport-https
+dpkg -i grafana_5.1.3_amd64.deb
 
 echo "deb https://packagecloud.io/grafana/stable/debian/ stretch main" >> /etc/apt/sources.list
 echo "deb https://packagecloud.io/grafana/testing/debian/ stretch main" >> /etc/apt/sources.list
 
-curl https://packagecloud.io/gpg.key | sudo apt-key add -
+curl https://packagecloud.io/gpg.key | apt-key add -
 
-sudo apt-get update
-sudo apt-get install grafana
-sudo apt-get install -y apt-transport-https
+apt-get update
+apt-get install -y grafana
 
-sudo service grafana-server start
-sudo update-rc.d grafana-server defaults
+#Listando os plugins disponíveis para serem instalados
+grafana-cli plugins list-remote
 
-systemctl daemon-reload
-systemctl start grafana-server
-systemctl status grafana-server
+#Iniciando o Grafana
+service grafana-server start
+
+#Instalando o plugin zabbix
+grafana-cli plugins install alexanderzobnin-zabbix-app
+
+#Configurando a inicialização com o sistema operacional
+update-rc.d grafana-server defaults
  
-sudo systemctl enable grafana-server.service
+systemctl enable grafana-server.service
+
+#Reiniciando o Grafana
+/etc/init.d/grafana-server restart
 
 }
 
