@@ -133,6 +133,7 @@ systemctl enable zabbix-agent
 sleep 2
 Menu
 }
+
 ZabbixAgent(){
 
 #outro teste não homologado
@@ -155,7 +156,8 @@ echo "Instlando o Agent Zabbix"
 sleep 2
 Menu
 }
-InstalarZabbix(){
+
+InstalarZabbix() {
 
 apt update && apt upgrade
 cd /tmp
@@ -172,7 +174,7 @@ quit;
 
 zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
 
-Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
+#Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
 
 # vim /etc/zabbix/zabbix_server.conf
 #...
@@ -220,7 +222,8 @@ sleep 3
 
 Menu
 }
-InstalarProxys(){
+
+InstalarProxys() {
 
 # Creating system user
 # 	groupadd zabbix
@@ -278,9 +281,10 @@ chmod +x /etc/init.d/zabbix-*
 systemctl enable zabbix-proxy
 systemctl enable zabbix-agent
 }
-InstalarGrafana(){
 
-cd /tmp
+InstalarGrafana() {
+
+cd /tmp/
 
 #Fazendo o download do Grafana
 wget https://grafanarel.s3.amazonaws.com/builds/grafana_4.1.1-1484211277_amd64.deb
