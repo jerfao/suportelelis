@@ -77,7 +77,7 @@ wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-
 dpkg -i zabbix-release_3.4-1%2Bstretch_all.deb
 
 #apt-get update
-echo "deb http://security.debian.org/debian-security stretch/updates main" > /etc/apt/sources.list
+echo "deb http://security.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
 echo "deb-src http://security.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
 echo "deb http://ftp.de.debian.org/debian stretch main" >> /etc/apt/sources.list
 echo "deb http://httpredir.debian.org/debian/ stretch main contrib non-free" >> /etc/apt/sources.list
@@ -95,6 +95,7 @@ chown zabbix. –R /var/lib/zabbix
 	sed -i 's/# ProxyOfflineBuffer=1*/ProxyOfflineBuffer=24/' /etc/zabbix/zabbix_agentd.conf
 	sed -i 's/# DataSenderFrequency=1*/DataSenderFrequency=1/' /etc/zabbix/zabbix_agentd.conf
 	sed -i 's/# DBName=Zabbix Server*/DBName=\/var\/lib\/sqlite3\/zabbix.db/' /etc/zabbix/zabbix_agentd.conf
+	
 	sed -i 's/# FpingLocation=\/usr\/sbin\/fping/FpingLocation=\/usr\/bin\/fping/' /etc/zabbix/zabbix_proxy.conf
 
 	
@@ -183,17 +184,13 @@ read  DBsenha
 echo  "banco criado verifique /etc/zabbix"
 sed -i 's/# DBPassword=/DBPassword='$DBsenha'/' /etc/zabbix/zabbix_server.conf
 
-mysql -uroot $(if test $rootPWD_SQL ; then -p$rootPWD_SQL; fi) zabbix < zcat /usr/share/zabbix-proxy-mysql/schema.sql.gz
+#mysql -uroot $(if test $rootPWD_SQL ; then -p$rootPWD_SQL; fi) zabbix < zcat /usr/share/zabbix-proxy-mysql/schema.sql.gz
 
 
-
-
-
-
-mariadb
-create database zabbix character set utf8 collate utf8_bin;
-grant all privileges on zabbix.* to zabbix@localhost identified by 'SENHA-USUARIO-ZABBIX';
-quit;
+#mariadb
+#create database zabbix character set utf8 collate utf8_bin;
+#grant all privileges on zabbix.* to zabbix@localhost identified by 'SENHA-USUARIO-ZABBIX';
+#quit;
 
 zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
 
@@ -312,51 +309,51 @@ InstalarGrafana() {
 cd /tmp/
 
 #Fazendo o download do Grafana
-wget https://grafanarel.s3.amazonaws.com/builds/grafana_4.1.1-1484211277_amd64.deb
+#wget https://grafanarel.s3.amazonaws.com/builds/grafana_4.1.1-1484211277_amd64.deb
 
 #Instalando dependências
-apt-get install -y adduser libfontconfig
+#apt-get install -y adduser libfontconfig
 
 #Instalando o pacote
-dpkg -i grafana_4.1.1-1484211277_amd64.deb
+#dpkg -i grafana_4.1.1-1484211277_amd64.deb
 
 #Configurando a inicialização com o sistema operacional
-update-rc.d -f grafana-server defaults
+#update-rc.d -f grafana-server defaults
 
 #Iniciando o Grafana
-service grafana-server start
+#service grafana-server start
 
 #Listando os plugins disponíveis para serem instalados
-grafana-cli plugins list-remote
+#grafana-cli plugins list-remote
 
 #Instalando o plugin
-grafana-cli plugins install alexanderzobnin-zabbix-app
+#grafana-cli plugins install alexanderzobnin-zabbix-app
 
 #Reiniciando o Grafana
-/etc/init.d/grafana-server restart
+#/etc/init.d/grafana-server restart
 
 #Atualizado
-# wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_5.1.3_amd64.deb
-# sudo apt-get install -y adduser libfontconfig
-# sudo dpkg -i grafana_5.1.3_amd64.deb
-# 
-# echo "deb https://packagecloud.io/grafana/stable/debian/ stretch main" >> /etc/apt/sources.list
-# echo "deb https://packagecloud.io/grafana/testing/debian/ stretch main" >> /etc/apt/sources.list
-# 
-# curl https://packagecloud.io/gpg.key | sudo apt-key add -
-# 
-# sudo apt-get update
-# sudo apt-get install grafana
-# sudo apt-get install -y apt-transport-https
-# 
-# sudo service grafana-server start
-# sudo update-rc.d grafana-server defaults
-# 
-# systemctl daemon-reload
-# systemctl start grafana-server
-# systemctl status grafana-server
-# 
-# sudo systemctl enable grafana-server.service
+wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_5.1.3_amd64.deb
+sudo apt-get install -y adduser libfontconfig
+sudo dpkg -i grafana_5.1.3_amd64.deb
+
+echo "deb https://packagecloud.io/grafana/stable/debian/ stretch main" >> /etc/apt/sources.list
+echo "deb https://packagecloud.io/grafana/testing/debian/ stretch main" >> /etc/apt/sources.list
+
+curl https://packagecloud.io/gpg.key | sudo apt-key add -
+
+sudo apt-get update
+sudo apt-get install grafana
+sudo apt-get install -y apt-transport-https
+
+sudo service grafana-server start
+sudo update-rc.d grafana-server defaults
+
+systemctl daemon-reload
+systemctl start grafana-server
+systemctl status grafana-server
+ 
+sudo systemctl enable grafana-server.service
 
 }
 
