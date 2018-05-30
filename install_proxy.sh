@@ -202,7 +202,7 @@ systemctl enable zabbix-agent
 /etc/init.d/zabbix-agent restart
 
 echo "Instalação Zabbix Concluida!.."
-sleep(3)
+sleep 3
 Menu
 
 }
