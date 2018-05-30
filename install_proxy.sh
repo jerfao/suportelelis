@@ -163,10 +163,33 @@ apt update && apt upgrade
 cd /tmp
 wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
 dpkg -i zabbix-release_3.4-1+stretch_all.deb
-apt update
-apt install zabbix-server-mysql zabbix-frontend-php zabbix-agent
+apt update -y
+apt install -y zabbix-server-mysql zabbix-frontend-php zabbix-agent
 
 #Vamos criar uma base de dados chamada zabbix e um usuário também chamado de zabbix no MariaDB.
+
+# Criando a base de dados zabbix
+echo "digete a senha do banco"
+read  DBsenha
+                echo "Creating zabbix database..."
+                mysql -u root -p -e "create database zabbix character set utf8 collate utf8_bin";
+                sleep 1
+                echo "Creating zabbix user at MariaDB SGBD..."
+                mysql -u root -p -e "create user 'zabbix'@'localhost' identified by '$DBsenha'";
+                sleep 1
+                echo "Making zabbix user the owner to zabbix database..."
+                mysql -u root -p -e "grant all privileges on zabbix.* to 'zabbix'@'localhost' with grant option";
+
+echo  "banco criado verifique /etc/zabbix"
+sed -i 's/# DBPassword=/DBPassword='$DBsenha'/' /etc/zabbix/zabbix_server.conf
+
+mysql -uroot $(if test $rootPWD_SQL ; then -p$rootPWD_SQL; fi) zabbix < zcat /usr/share/zabbix-proxy-mysql/schema.sql.gz
+
+
+
+
+
+
 mariadb
 create database zabbix character set utf8 collate utf8_bin;
 grant all privileges on zabbix.* to zabbix@localhost identified by 'SENHA-USUARIO-ZABBIX';
@@ -192,7 +215,7 @@ sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America
 
 sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/zabbix/apache.conf
 
-apt install php7.0-bcmath php7.0-mbstring php-sabre-xml
+apt install php7.0-bcmath php7.0-mbstring php-sabre-xml -y
 
 /etc/init.d/apache2 restart
 
@@ -203,8 +226,10 @@ systemctl enable zabbix-agent
 /etc/init.d/zabbix-server restart
 /etc/init.d/zabbix-agent restart
 
+clear
 echo "Instalação Zabbix Concluida!.."
-sleep 3
+sleep 4
+
 Menu
 
 }
