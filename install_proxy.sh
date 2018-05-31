@@ -6,7 +6,7 @@ clear
    echo "    LinuxAdmin  - Zabbix 3.4        "
    echo "------------------------------------------"
    echo
-   echo "[ 1 ] Instalar Zabbix"
+   echo "[ 1 ] Zabbix Server"
    echo "[ 2 ] Zabbix Proxy"
    echo "[ 3 ] Zabbix Agent"
    echo "[ 4 ] Desinstalar"
@@ -14,9 +14,10 @@ clear
    echo "[ 6 ] Sair"
    echo
    echo -n "Qual a opcao desejada ? "
+   echo "------------------------------------------"
    read opcao
    case $opcao in
-      1) InstalarZabbix;;
+      1) ZabbixServer;;
       2) ZabbixProxy;;
       3) ZabbixAgent;;
       4) Desinstalar;;
@@ -138,34 +139,39 @@ Menu
 ZabbixAgent(){
 
 #outro teste não homologado
-echo "Instlando o Agent Zabbix"
+echo "Instalando o Agent Zabbix"
 #Instalando o Zabbix Proxy x Zabbix Agent:
 # apt install zabbix-proxy-mysql zabbix-agent
-# apt-get install zabbix-agent
-# service zabbix-agent start
+apt-get install zabbix-agent
+service zabbix-agent start
 #systemctl start zabbix-proxy
-#systemctl start zabbix-agent
-# apt-get update
-#   apt-get -y install zabbix-agent sysv-rc-conf
-#   sysv-rc-conf zabbix-agent on
-#   sed -i 's/Server=127.0.0.1/Server=52.90.49.206/' /etc/zabbix/zabbix_agentd.conf
-#   sed -i 's/ServerActive=127.0.0.1/ServerActive=52.90.49.206/' /etc/zabbix/zabbix_agentd.conf
-#   HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
-#   service zabbix-agent restart
+systemctl start zabbix-agent
+apt-get update
+apt-get -y install zabbix-agent sysv-rc-conf
+sysv-rc-conf zabbix-agent on
+myip=$(hostname -I)
+sed -i 's/Server=127.0.0.1/Server=$myip/' /etc/zabbix/zabbix_agentd.conf
+sed -i 's/ServerActive=127.0.0.1/ServerActive=$myip/' /etc/zabbix/zabbix_agentd.conf
+HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
+service zabbix-agent restart
 #---------------------------------------------------------------------------------------------------
 
 sleep 2
 Menu
 }
 
-InstalarZabbix() {
+ZabbixServer() {
+
+groupadd zabbix
+useradd -g zabbix -s /bin/false zabbix
 
 apt update && apt upgrade
 cd /tmp
+
 wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
 dpkg -i zabbix-release_3.4-1+stretch_all.deb
-apt update -y
-apt install -y zabbix-server-mysql zabbix-frontend-php zabbix-agent
+apt-get update -y
+apt-get install -y zabbix-server-mysql zabbix-frontend-php zabbix-agent zabbix-get 
 
 #Vamos criar uma base de dados chamada zabbix e um usuário também chamado de zabbix no MariaDB.
 
@@ -173,13 +179,13 @@ apt install -y zabbix-server-mysql zabbix-frontend-php zabbix-agent
 echo "digete a senha do banco"
 read  DBsenha
                 echo "Creating zabbix database..."
-                mysql -u root -p -e "create database zabbix character set utf8 collate utf8_bin";
+                mysql -u root -p$DBsenha -e "create database zabbix character set utf8 collate utf8_bin";
                 sleep 1
                 echo "Creating zabbix user at MariaDB SGBD..."
-                mysql -u root -p -e "create user 'zabbix'@'localhost' identified by '$DBsenha'";
+                mysql -u root -p$DBsenha -e "create user 'zabbix'@'localhost' identified by '$DBsenha'";
                 sleep 1
                 echo "Making zabbix user the owner to zabbix database..."
-                mysql -u root -p -e "grant all privileges on zabbix.* to 'zabbix'@'localhost' with grant option";
+                mysql -u root -p$DBsenha -e "grant all privileges on zabbix.* to 'zabbix'@'localhost' with grant option";
 
 echo  "banco criado verifique /etc/zabbix"
 sed -i 's/# DBPassword=/DBPassword='$DBsenha'/' /etc/zabbix/zabbix_server.conf
@@ -192,8 +198,15 @@ sed -i 's/# DBPassword=/DBPassword='$DBsenha'/' /etc/zabbix/zabbix_server.conf
 #grant all privileges on zabbix.* to zabbix@localhost identified by 'SENHA-USUARIO-ZABBIX';
 #quit;
 
-zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
+#testar param senha aqui
+echo "Populando o Banco de Dados, Aguarde!"
+#zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
+zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p $DBsenha
 
+myip=$(hostname -I)
+echo "seu Ip: $myip"
+
+echo "Banco Populado acesse http://$myip/ZABBIX"
 #Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
 
 # vim /etc/zabbix/zabbix_server.conf
@@ -208,11 +221,20 @@ zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
 #...
 #mudando o timezone
 
+
+sed -i 's/# DBHost=localhost/ DBHost=localhost/' /etc/zabbix/zabbix_server.conf
+
+#config basica do Agent
+sed -i 's/Server=127.0.0.1/Server=$myip/' /etc/zabbix/zabbix_agentd.conf
+sed -i 's/ServerActive=127.0.0.1/ServerActive=$myip/' /etc/zabbix/zabbix_agentd.conf
+HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
+service zabbix-agent restart
+
 sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/apache2/conf-enabled/zabbix.conf
 
 sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/zabbix/apache.conf
 
-apt install php7.0-bcmath php7.0-mbstring php-sabre-xml -y
+apt install -y php7.0-bcmath php7.0-mbstring php-sabre-xml
 
 /etc/init.d/apache2 restart
 
@@ -223,8 +245,10 @@ systemctl enable zabbix-agent
 /etc/init.d/zabbix-server restart
 /etc/init.d/zabbix-agent restart
 
+ZabbixAgent
+
 clear
-echo "Instalação Zabbix Concluida!.."
+echo "Instalação Zabbix Server Concluida!.."
 sleep 4
 
 Menu
@@ -302,6 +326,7 @@ chmod +x /etc/init.d/zabbix-*
 #Inicializando junto com o sistema operacional
 systemctl enable zabbix-proxy
 systemctl enable zabbix-agent
+
 }
 
 InstalarGrafana() {
@@ -331,8 +356,8 @@ cd /tmp/
 
 #Reiniciando o Grafana
 #/etc/init.d/grafana-server restart
-
-#Atualizado
+##################################################################################################################
+#Atualizado e homologado
 wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_5.1.3_amd64.deb
 apt-get install -y adduser libfontconfig apt-transport-https
 dpkg -i grafana_5.1.3_amd64.deb
@@ -340,7 +365,7 @@ dpkg -i grafana_5.1.3_amd64.deb
 echo "deb https://packagecloud.io/grafana/stable/debian/ stretch main" >> /etc/apt/sources.list
 echo "deb https://packagecloud.io/grafana/testing/debian/ stretch main" >> /etc/apt/sources.list
 
-curl https://packagecloud.io/gpg.key | apt-key add -
+#curl https://packagecloud.io/gpg.key | apt-key add -
 
 apt-get update
 apt-get install -y grafana
@@ -361,6 +386,9 @@ systemctl enable grafana-server.service
 
 #Reiniciando o Grafana
 /etc/init.d/grafana-server restart
+
+clear
+Menu
 
 }
 
