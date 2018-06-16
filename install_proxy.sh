@@ -1,8 +1,7 @@
 #!/bin/bash
 clear
-
 Menu(){
-   clear
+clear
    echo "------------------------------------------"
    echo "    LinuxAdmin  - Zabbix 3.4        "
    echo "------------------------------------------"
@@ -15,9 +14,7 @@ Menu(){
    echo "[ 6 ] Sair"
    echo
    echo -n "Qual a opcao desejada ? "
-   echo
    echo "------------------------------------------"
-   echo
    read opcao
    case $opcao in
       1) ZabbixServer;;
@@ -31,10 +28,8 @@ Menu(){
 }
 Desinstalar(){
 
-sudo dpkg -P zabbix*
-apt-get remove zabbix-agent --purge
+sudo dpkg -P zabbix
 echo "desinstaldo o Zabbix"
-
 }
 
 Backup() {
@@ -73,7 +68,7 @@ Menu
 ZabbixProxy() {
 echo "Instalando o Zabbix Proxy"
 sleep 1
-cd /tmp/
+cd /tmp
 
 # Creating system user
 groupadd zabbix
@@ -99,14 +94,16 @@ chown zabbix. –R /var/lib/zabbix
 # Habilitando execução de comandos via Zabbix
 	sed -i 's/# EnableRemoteCommands=0*/EnableRemoteCommands=1/' /etc/zabbix/zabbix_agentd.conf
 	sed -i 's/# ProxyOfflineBuffer=1*/ProxyOfflineBuffer=24/' /etc/zabbix/zabbix_agentd.conf
+	sed -i 's/# ConfigFrequency=*/ConfigFrequency=3600/' /etc/zabbix/zabbix_agentd.conf
 	sed -i 's/# DataSenderFrequency=1*/DataSenderFrequency=1/' /etc/zabbix/zabbix_agentd.conf
 	sed -i 's/# DBName=Zabbix Server*/DBName=\/var\/lib\/sqlite3\/zabbix.db/' /etc/zabbix/zabbix_agentd.conf
+	
 	
 	sed -i 's/# FpingLocation=\/usr\/sbin\/fping/FpingLocation=\/usr\/bin\/fping/' /etc/zabbix/zabbix_proxy.conf
 
 	
 	
-#populando sqlite3
+# populando sqlite3 não obrigratorio
 sqlite3 /var/lib/sqlite3/zabbix.db < schema.sql
 
 # service zabbix-proxy start
@@ -144,20 +141,19 @@ Menu
 ZabbixAgent(){
 
 #outro teste não homologado
+
 echo "Instalando o Agent Zabbix"
-#Instalando o Zabbix Proxy x Zabbix Agent:
-# apt install zabbix-proxy-mysql zabbix-agent
+#Instalando o Zabbix Agent:
 apt-get install zabbix-agent
 service zabbix-agent start
-#systemctl start zabbix-proxy
 systemctl start zabbix-agent
-apt-get update
-apt-get -y install zabbix-agent sysv-rc-conf
-sysv-rc-conf zabbix-agent on
-myip=$(hostname -I)
-sed -i 's/Server=127.0.0.1/Server='$myip'/' /etc/zabbix/zabbix_agentd.conf
-sed -i 's/ServerActive=127.0.0.1/ServerActive='$myip'/' /etc/zabbix/zabbix_agentd.conf
-HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
+
+#apt-get -y install zabbix-agent sysv-rc-conf
+#sysv-rc-conf zabbix-agent on
+#myip=$(hostname -I)
+#sed -i 's/Server=127.0.0.1/Server='$myip'/' /etc/zabbix/zabbix_agentd.conf
+#sed -i 's/ServerActive=127.0.0.1/ServerActive='$myip'/' /etc/zabbix/zabbix_agentd.conf
+#HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
 service zabbix-agent restart
 #---------------------------------------------------------------------------------------------------
 
@@ -170,17 +166,13 @@ ZabbixServer() {
 groupadd zabbix
 useradd -g zabbix -s /bin/false zabbix
 
-apt-get update && apt-get upgrade
-cd /tmp/
-wget -qO- https://goo.gl/NJNoqi | bash
+apt update && apt upgrade
+cd /tmp
 
 wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
 dpkg -i zabbix-release_3.4-1+stretch_all.deb
 apt-get update -y
 apt-get install -y zabbix-server-mysql zabbix-frontend-php zabbix-agent zabbix-get 
-
-#Instalando php7
-apt install -y php7.0-bcmath php7.0-mbstring php-sabre-xml
 
 #Vamos criar uma base de dados chamada zabbix e um usuário também chamado de zabbix no MariaDB.
 
@@ -195,32 +187,47 @@ read  DBsenha
                 sleep 1
                 echo "Making zabbix user the owner to zabbix database..."
                 mysql -u root -p$DBsenha -e "grant all privileges on zabbix.* to 'zabbix'@'localhost' with grant option";
-
+				mysql -u root -p$DBsenha -e "quit";
+				
 echo  "banco criado verifique /etc/zabbix"
 sed -i 's/# DBPassword=/DBPassword='$DBsenha'/' /etc/zabbix/zabbix_server.conf
 
-#testar param senha aqui
-echo "Populando o Banco de Dados, Aguarde!"
+echo "Populando o Banco de Dados,este procedimento demora um pouco, por favor Aguarde!"
 #zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
-zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p$DBsenha zabbix
+zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
 
 myip=$(hostname -I)
-echo "seu Ip: '$myip'"
+echo "seu Ip: $myip"
 
-echo "Banco Populado acesse http://'$myip'/ZABBIX"
+echo "Banco Populado acesse http://$myip/ZABBIX"
+#Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
+
+# vim /etc/zabbix/zabbix_server.conf
+#...
+#DBHost=localhost
+#...
+#DBName=zabbix
+#...
+#DBUser=zabbix
+#...
+#DBPassword=SENHA-USUARIO-ZABBIX
+#...
+#mudando o timezone
+
 
 sed -i 's/# DBHost=localhost/ DBHost=localhost/' /etc/zabbix/zabbix_server.conf
 
 #config basica do Agent
-sed -i 's/Server=127.0.0.1/Server='$myip'/' /etc/zabbix/zabbix_agentd.conf
+sed -i 's/Server=127.0.0.1/Server=$myip/' /etc/zabbix/zabbix_agentd.conf
 sed -i 's/ServerActive=127.0.0.1/ServerActive=$myip/' /etc/zabbix/zabbix_agentd.conf
 HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
-
+#service zabbix-agent restart
 
 sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/apache2/conf-enabled/zabbix.conf
 
 sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/zabbix/apache.conf
 
+apt install -y php7.0-bcmath php7.0-mbstring php-sabre-xml
 
 /etc/init.d/apache2 restart
 
@@ -231,7 +238,7 @@ systemctl enable zabbix-agent
 /etc/init.d/zabbix-server restart
 /etc/init.d/zabbix-agent restart
 
-ZabbixAgent
+#ZabbixAgent
 
 clear
 echo "Instalação Zabbix Server Concluida!.."
@@ -244,6 +251,9 @@ Menu
 
 Downloads() {
 
+#Versão teste 
+VERSAO=3.2.0
+export VERSAO
 cd /tmp/
 wget  wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
 dpkg -i zabbix-release_3.4-1+stretch_all.deb
@@ -272,16 +282,16 @@ apt-get -y install build-essential snmp vim libssh2-1-dev libssh2-1 libopenipmi-
 # apt-get -y install sudo git vim snmp snmpd python-pip libxml2 libxml2-dev curl fping libcurl3 libevent-dev libpcre3-dev libcurl3-gnutls libcurl3-gnutls-dev libcurl4-gnutls-dev build-essential libssh2-1-dev libssh2-1 libiksemel-dev libiksemel-utils libiksemel3 fping libopenipmi-dev snmp snmp-mibs-downloader libsnmp-dev libmariadbd18 libmariadbd-dev snmpd ttf-dejavu-core libltdl7 libodbc1 libgnutls28-dev libldap2-dev openjdk-8-jdk unixodbc-dev mariadb-server pip install zabbix-api
 
 #baixando o zabbix
-wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix/zabbix_3.4.10.orig.tar.gz
+wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix/zabbix_3.2.3.orig.tar.gz
 
 #descompactando arquivos
-tar -xzvf zabbix-3.4.10.orig.tar.gz
+tar -xzvf zabbix_3.2.3.orig.tar.gz
 
 #mudando a permissao de execução
-chmod -R +x zabbix_3.4.10
+chmod -R +x zabbix-3.2.3
 
 #entrando no diretorio sqlite3
-cd zabbix-3.4.10/database/sqlite3/ && mkdir /var/lib/sqlite3/
+cd zabbix-3.2.3/database/sqlite3/ && mkdir /var/lib/sqlite3/
 
 #populando sqlite3
 sqlite3 /var/lib/sqlite3/zabbix.db < schema.sql
@@ -316,36 +326,16 @@ systemctl enable zabbix-agent
 }
 
 InstalarGrafana() {
-#homologado 05/06/2018
+
 ##################################################################################################################
+
+#Atualizado e homologado
+
 cd /tmp/
-
 #Fazendo o download do Grafana
-#wget https://grafanarel.s3.amazonaws.com/builds/grafana_4.1.1-1484211277_amd64.deb
-
-#Instalando dependências
-#apt-get install -y adduser libfontconfig
+wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_5.1.3_amd64.deb
 
 #Instalando o pacote
-#dpkg -i grafana_4.1.1-1484211277_amd64.deb
-
-#Configurando a inicialização com o sistema operacional
-#update-rc.d -f grafana-server defaults
-
-#Iniciando o Grafana
-#service grafana-server start
-
-#Listando os plugins disponíveis para serem instalados
-#grafana-cli plugins list-remote
-
-#Instalando o plugin
-#grafana-cli plugins install alexanderzobnin-zabbix-app
-
-#Reiniciando o Grafana
-#/etc/init.d/grafana-server restart
-##################################################################################################################
-#Atualizado e homologado
-wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_5.1.3_amd64.deb
 apt-get install -y adduser libfontconfig apt-transport-https
 dpkg -i grafana_5.1.3_amd64.deb
 
@@ -368,12 +358,14 @@ grafana-cli plugins install alexanderzobnin-zabbix-app
 
 #Configurando a inicialização com o sistema operacional
 update-rc.d grafana-server defaults
- 
+
 systemctl enable grafana-server.service
 
 #Reiniciando o Grafana
 /etc/init.d/grafana-server restart
 
+
+#apos a instalação abre no navegador http://ipdoserver:3000
 clear
 Menu
 
