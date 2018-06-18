@@ -197,9 +197,9 @@ echo "Populando o Banco de Dados,este procedimento demora um pouco, por favor Ag
 zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -uzabbix -p zabbix
 
 myip=$(hostname -I)
-echo "seu Ip: $myip"
+echo "seu Ip: '$myip'"
 
-echo "Banco Populado acesse http://$myip/ZABBIX"
+echo "Banco Populado acesse http://'$myip'/ZABBIX"
 #Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
 
 # vim /etc/zabbix/zabbix_server.conf
@@ -218,9 +218,9 @@ echo "Banco Populado acesse http://$myip/ZABBIX"
 sed -i 's/# DBHost=localhost/ DBHost=localhost/' /etc/zabbix/zabbix_server.conf
 
 #config basica do Agent
-sed -i 's/Server=127.0.0.1/Server=$myip/' /etc/zabbix/zabbix_agentd.conf
-sed -i 's/ServerActive=127.0.0.1/ServerActive=$myip/' /etc/zabbix/zabbix_agentd.conf
-HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
+#sed -i 's/Server=127.0.0.1/Server=$myip/' /etc/zabbix/zabbix_agentd.conf
+#sed -i 's/ServerActive=127.0.0.1/ServerActive=$myip/' /etc/zabbix/zabbix_agentd.conf
+#HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
 #service zabbix-agent restart
 
 sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/apache2/conf-enabled/zabbix.conf
