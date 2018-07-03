@@ -3,11 +3,11 @@ clear
 Menu(){
 clear
    echo "------------------------------------------"
-   echo "    LinuxAdmin  - Zabbix 3.4        "
+   echo "    LinuxAdmin  - Zabbix 3.4              "
    echo "------------------------------------------"
    echo
-   echo "[ 1 ] Zabbix Server"
-   echo "[ 2 ] Zabbix Proxy"
+   echo "[ 1 ] Zabbix Server + Zabbix Agent"
+   echo "[ 2 ] Zabbix Proxy + Zabbix Agent"
    echo "[ 3 ] Zabbix Agent"
    echo "[ 4 ] Desinstalar"
    echo "[ 5 ] Grafana"
@@ -69,7 +69,7 @@ Menu
 ZabbixAgent(){
 
 #outro teste não homologado
-
+Downloads
 echo "Instalando o Agent Zabbix"
 #Instalando o Zabbix Agent:
 apt-get install zabbix-agent
@@ -97,15 +97,16 @@ Menu
 }
 
 ZabbixServer() {
-
+####################
 groupadd zabbix
 useradd -g zabbix -s /bin/false zabbix
 wget -qO- https://goo.gl/NJNoqi | bash
-
+###################
 apt-get update && apt-get upgrade
 cd /tmp/
 
-wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
+Downloads 
+#wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
 dpkg -i zabbix-release_3.4-1+stretch_all.deb
 apt-get update -y
 apt-get install -y zabbix-server-mysql zabbix-frontend-php zabbix-agent zabbix-get zabbix-sender php7.0-bcmath php7.0-mbstring php-sabre-xml nmap sudo snmp-mibs-downloader snmpd
@@ -137,37 +138,21 @@ myip=$(hostname -I)
 echo "seu Ip: '$myip'"
 
 echo "Banco Populado acesse http://'$myip'/ZABBIX"
-#Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
 
+#Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
 # vim /etc/zabbix/zabbix_server.conf
 #...
 #DBHost=localhost
-#...
-#DBName=zabbix
-#...
-#DBUser=zabbix
-#...
-#DBPassword=SENHA-USUARIO-ZABBIX
-#...
-#mudando o timezone
-
-
 sed -i 's/# DBHost=localhost/ DBHost=localhost/' /etc/zabbix/zabbix_server.conf
 
-#config basica do Agent
-#sed -i 's/Server=127.0.0.1/Server=$myip/' /etc/zabbix/zabbix_agentd.conf
-#sed -i 's/ServerActive=127.0.0.1/ServerActive=$myip/' /etc/zabbix/zabbix_agentd.conf
-#HOSTNAME=`hostname` && sed -i "s/Hostname=Zabbix\ server/Hostname=$HOSTNAME/" /etc/zabbix/zabbix_agentd.conf
-#service zabbix-agent restart
-
+#mudando o timezone
 sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/apache2/conf-enabled/zabbix.conf
 
 sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America\/Sao_Paulo/' /etc/zabbix/apache.conf
 
+
 # iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 10050 -j ACCEPT
 echo "zabbix ALL=(ALL:ALL) NOPASSWD:/usr/bin/nmap" >> /etc/sudoers
-
-#apt install php7.0-bcmath php7.0-mbstring php-sabre-xml -y
 
 /etc/init.d/apache2 restart
 
@@ -190,19 +175,19 @@ Menu
 
 
 Downloads() {
-
-#Versão teste
-VERSAO=3.2.0
-export VERSAO
+#Funcao Donwload para caso mude a versão, troque somente aqui
 cd /tmp/
-wget  wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
-dpkg -i zabbix-release_3.4-1+stretch_all.deb
+if wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb > /dev/null; then
+     echo "download efetuado com sucesso."
+     sleep 3
+    
+else
+     echo "falha no download!!!"
+     sleep 5
+     Menu
+     
+fi
 
-ls
-echo "Download Realizado com Sucesso!"
-sleep 3
-
-Menu
 }
 ZabbixProxy() {
 echo "Instalando o Zabbix Proxy"
@@ -213,8 +198,9 @@ cd /tmp
 groupadd zabbix
 useradd -g zabbix -s /bin/false zabbix
 
-wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1%2Bstretch_all.deb
-dpkg -i zabbix-release_3.4-1%2Bstretch_all.deb
+Downloads
+#wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1%2Bstretch_all.deb
+#dpkg -i zabbix-release_3.4-1%2Bstretch_all.deb
 
 #apt-get update
 echo "deb http://security.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
