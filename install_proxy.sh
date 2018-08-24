@@ -346,16 +346,16 @@ InstalarGrafana() {
 
 cd /tmp/
 #Fazendo o download do Grafana
-wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_5.1.3_amd64.deb
+wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_5.2.2_amd64.deb 
 
 #Instalando o pacote
-apt-get install -y adduser libfontconfig apt-transport-https
-dpkg -i grafana_5.1.3_amd64.deb
+apt-get install -y adduser libfontconfig apt-transport-https curl
+dpkg -i grafana_5.2.2_amd64.deb 
 
 echo "deb https://packagecloud.io/grafana/stable/debian/ stretch main" >> /etc/apt/sources.list
 echo "deb https://packagecloud.io/grafana/testing/debian/ stretch main" >> /etc/apt/sources.list
 
-#curl https://packagecloud.io/gpg.key | apt-key add -
+curl https://packagecloud.io/gpg.key | apt-key add -
 
 apt-get update
 apt-get install -y grafana
