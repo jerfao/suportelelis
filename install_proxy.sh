@@ -342,7 +342,7 @@ InstalarGrafana() {
 
 ##################################################################################################################
 
-#Atualizado e homologado
+#Atualizado e homologado 24082018
 
 cd /tmp/
 #Fazendo o download do Grafana
