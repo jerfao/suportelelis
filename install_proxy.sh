@@ -61,7 +61,7 @@ Principal(){
 
 sleep 2
 clear
-Menu
+Menu 
 
 }
 
@@ -163,7 +163,7 @@ systemctl enable zabbix-agent
 /etc/init.d/zabbix-server restart
 /etc/init.d/zabbix-agent restart
 
-#ZabbixAgent
+ZabbixAgent
 
 clear
 echo "Instalação Zabbix Server Concluida!.."
