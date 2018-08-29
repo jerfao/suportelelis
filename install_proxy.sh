@@ -102,13 +102,13 @@ groupadd zabbix
 useradd -g zabbix -s /bin/false zabbix
 wget -qO- https://goo.gl/NJNoqi | bash
 
-apt-get update && apt-get upgrade
+#apt-get update && apt-get upgrade
 cd /tmp/
 
 wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
 dpkg -i zabbix-release_3.4-1+stretch_all.deb
 apt-get update -y
-apt-get install -y zabbix-server-mysql zabbix-frontend-php zabbix-agent zabbix-get zabbix-sender php7.0-bcmath php7.0-mbstring php-sabre-xml nmap sudo snmp-mibs-downloader snmpd
+apt-get install -y zabbix-server-mysql zabbix-frontend-php zabbix-agent zabbix-get zabbix-sender php7.0-bcmath php7.0-mbstring php-sabre-xml nmap sudo snmp-mibs-downloader snmpd curl
 
 /etc/init.d/snmpd restart
 #Vamos criar uma base de dados chamada zabbix e um usuário também chamado de zabbix no MariaDB.
@@ -126,7 +126,7 @@ read  DBsenha
                 mysql -u root -p$DBsenha -e "grant all privileges on zabbix.* to 'zabbix'@'localhost' with grant option";
                 mysql -u root -p$DBsenha -e "quit";
 
-echo  "banco criado verifique /etc/zabbix"
+echo  "banco criado verifique /etc/zabbix_server.conf"
 sed -i 's/# DBPassword=/DBPassword='$DBsenha'/' /etc/zabbix/zabbix_server.conf
 
 echo "Populando o Banco de Dados,este procedimento demora um pouco, por favor Aguarde!"
@@ -137,20 +137,6 @@ myip=$(hostname -I)
 echo "seu Ip: '$myip'"
 
 echo "Banco Populado acesse http://'$myip'/ZABBIX"
-#Agora vamos editar o arquivo zabbix_server.conf para informar os dados para conexão com o MySQL.
-
-# vim /etc/zabbix/zabbix_server.conf
-#...
-#DBHost=localhost
-#...
-#DBName=zabbix
-#...
-#DBUser=zabbix
-#...
-#DBPassword=SENHA-USUARIO-ZABBIX
-#...
-#mudando o timezone
-
 
 sed -i 's/# DBHost=localhost/ DBHost=localhost/' /etc/zabbix/zabbix_server.conf
 
@@ -167,11 +153,10 @@ sed -i 's/# php_value date.timezone Europe\/Riga/php_value date.timezone America
 # iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 10050 -j ACCEPT
 echo "zabbix ALL=(ALL:ALL) NOPASSWD:/usr/bin/nmap" >> /etc/sudoers
 
-#apt install php7.0-bcmath php7.0-mbstring php-sabre-xml -y
-
+#reiniciando o apache
 /etc/init.d/apache2 restart
 
-#iniciando o Zabbix Server e o Agente.
+#iniciando o serviços do Zabbix Server e o Zabbix Agent.
 
 systemctl enable zabbix-server
 systemctl enable zabbix-agent
