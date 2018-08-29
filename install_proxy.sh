@@ -163,13 +163,8 @@ systemctl enable zabbix-agent
 /etc/init.d/zabbix-server restart
 /etc/init.d/zabbix-agent restart
 
-<<<<<<< HEAD
 ZabbixAgent
 
-=======
-#ZabbixAgent
- 
->>>>>>> 74909a721f6dae413aa4905e47c89b96d281e1d1
 clear
 echo "Instalação Zabbix Server Concluida!.."
 sleep 4
