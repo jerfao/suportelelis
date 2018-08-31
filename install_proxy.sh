@@ -128,6 +128,12 @@ read  DBsenha
 
 echo  "banco criado verifique /etc/zabbix_server.conf"
 sed -i 's/# DBPassword=/DBPassword='$DBsenha'/' /etc/zabbix/zabbix_server.conf
+#Ajustes no zabbix_server.conf
+#Zabbix discoverer processes more than 75% busy
+sed -i 's/# StartPollers=5/ StartPollers=20/' //etc/zabbix/zabbix_server.conf
+sed -i 's/#StartPingers=1/ StartPingers=10/' //etc/zabbix/zabbix_server.conf
+sed -i 's/#StartDiscoverers=1/ StartDiscoverers=10/' //etc/zabbix/zabbix_server.conf
+
 
 echo "Populando o Banco de Dados,este procedimento demora um pouco, por favor Aguarde!"
 
